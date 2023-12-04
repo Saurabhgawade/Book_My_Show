@@ -3,6 +3,9 @@ package com.Accio.BookMyShowProject.Models;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name="user")
 @Getter
@@ -23,4 +26,7 @@ public class User {
     private int age;
 
     private String mobNo;
+
+    @OneToMany(mappedBy = "user",cascade = CascadeType.ALL)
+    List<Ticket>ticketList=new ArrayList<>();
 }

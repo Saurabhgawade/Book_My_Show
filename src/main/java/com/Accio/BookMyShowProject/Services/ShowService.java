@@ -1,16 +1,19 @@
 package com.Accio.BookMyShowProject.Services;
 
-import com.Accio.BookMyShowProject.Models.Movie;
-import com.Accio.BookMyShowProject.Models.Show;
-import com.Accio.BookMyShowProject.Models.Theatre;
+import com.Accio.BookMyShowProject.Enums.SeatType;
+import com.Accio.BookMyShowProject.Models.*;
 import com.Accio.BookMyShowProject.Repositories.MovieRepository;
 import com.Accio.BookMyShowProject.Repositories.ShowRepository;
+import com.Accio.BookMyShowProject.Repositories.ShowSeatSeats;
 import com.Accio.BookMyShowProject.Repositories.TheatreRepository;
 import com.Accio.BookMyShowProject.Transformer.showTransformer;
 import com.Accio.BookMyShowProject.dtos.addshowdto;
+import com.Accio.BookMyShowProject.dtos.addshowseatsdto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,6 +26,9 @@ public class ShowService {
 
     @Autowired
     private TheatreRepository theatreRepository;
+
+    @Autowired
+    private ShowSeatSeats showSeatSeats;
 
     public String addshow(addshowdto addshowdto){
         Show show= showTransformer.showdtoToShow(addshowdto);
@@ -40,5 +46,35 @@ public class ShowService {
 
         showRepository.save(show);
         return "show is added with showId";
+    }
+    public String addshowseats(addshowseatsdto addshowseatsdto){
+        Show show=showRepository.findById(addshowseatsdto.getShowId()).get();
+
+        Theatre theatre=show.getTheatre();
+
+        List<TheatreSeat>theatreSeatList=theatre.getTheatreSeatList();
+
+        List<ShowSeat>showSeatList=new ArrayList<>();
+
+        for(TheatreSeat theatreSeat:theatreSeatList) {
+            ShowSeat showSeat = ShowSeat.builder()
+                    .seatNo(theatreSeat.getSeatNo())
+                    .seatType(theatreSeat.getSeatType())
+                    .isAvailable(true)
+                    .foodAttached(false)
+                    .show(show)
+                    .build();
+
+            if (theatreSeat.getSeatType().equals(SeatType.Classic)) {
+                showSeat.setPrice(addshowseatsdto.getPriceofclassicseat());
+            }
+            else showSeat.setPrice(addshowseatsdto.getPriceofpremiumseat());
+            showSeatList.add(showSeat);
+
+        }
+        show.setShowSeatList(showSeatList);
+
+        showSeatSeats.saveAll(showSeatList);
+        return "added show seats";
     }
 }

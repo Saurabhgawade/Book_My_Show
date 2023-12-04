@@ -5,6 +5,8 @@ import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name="show")
@@ -29,4 +31,10 @@ public class Show {
     @ManyToOne
     @JoinColumn
     private Theatre theatre;
+
+    @OneToMany(mappedBy = "show",cascade = CascadeType.ALL)
+    private List<ShowSeat>showSeatList=new ArrayList<>();
+
+    @OneToMany(mappedBy = "show",cascade = CascadeType.ALL)
+    private List<Ticket>ticketList=new ArrayList<>();
 }
